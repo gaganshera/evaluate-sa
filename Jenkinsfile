@@ -44,7 +44,7 @@ pipeline{
 
         stage('SonarQube Analysis'){
             when {
-                branch 'develop-original'
+                branch 'production'
             }
 			steps{
 				withSonarQubeEnv('Test_Sonar'){
