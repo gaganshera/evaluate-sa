@@ -1,4 +1,4 @@
-pipeline{ 
+pipeline{
     environment {
     username = 'samraazeem'
     dockerPort = "${env.BRANCH_NAME == "develop" ? 7300 : 7200}"
@@ -7,9 +7,14 @@ pipeline{
     registryCredential = 'docker'
     dockerImage= ''
     kubernetesContext = "Istio-Cluster"
-    }  
-    agent any 
-    
+    }
+    agent any
+
+    tools {
+        nodejs "nodejs"
+        dockerTool 'docker'
+    }
+
     options {
         skipDefaultCheckout(true)
     }
@@ -24,17 +29,17 @@ pipeline{
         stage('Build') {
             steps{
                 sh 'npm install'
-                sh 'npm run build'  
+                sh 'npm run build'
             }
         }
 
         stage('Unit Testing'){
             when {
-                branch 'development'
+                branch 'master-original'
             }
             steps{
                sh 'ng test --codeCoverage=true --watcher=true'
-            } 
+            }
         }
 
         stage('SonarQube Analysis'){
@@ -42,16 +47,16 @@ pipeline{
                 branch 'production'
             }
 			steps{
-				withSonarQubeEnv('SONAR'){
+				withSonarQubeEnv('Test_Sonar'){
 					sh 'npm run sonar'
 				}
 			}
 		}
 
-        stage('Docker Image') { 
+        stage('Docker Image') {
             steps{
                 script {
-                    dockerImage= docker.build registry + ":$BUILD_NUMBER"
+                    dockerImage= docker.build registry + "i-${username}-${BRANCH_NAME}:${BUILD_NUMBER}"
                 }
             }
         }
@@ -59,32 +64,37 @@ pipeline{
         stage('Container'){
             parallel {
                 stage('PreContainer Check'){
+                    when {
+                        expression {
+                            return sh (script: "docker port c-${username}-${BRANCH_NAME}", returnStatus: true) == 0;
+                        }
+                    }
                     steps{
                         sh(script: "docker stop c-${username}-${BRANCH_NAME}", returnStatus: true)
                         sh(script: "docker rm -f c-${username}-${BRANCH_NAME}", returnStatus: true)
                     }
                 }
-                stage('Publish DockerHub'){
-                    steps{
-                        sh "docker tag i-${username}-${BRANCH_NAME}:${BUILD_NUMBER} ${dockerUsername}/i-${username}-${BRANCH_NAME}:${BUILD_NUMBER}"
-                        sh "docker tag i-${username}-${BRANCH_NAME}:${BUILD_NUMBER} ${dockerUsername}/i-${username}-${BRANCH_NAME}"
-                        sh "docker push ${dockerUsername}/i-${username}-${BRANCH_NAME}:${BUILD_NUMBER}"
-                        sh "docker push ${dockerUsername}/i-${username}-${BRANCH_NAME}"
-                    }
-                }
-            }  
+                // stage('Publish DockerHub'){
+                //     steps{
+                //         sh "docker tag i-${username}-${BRANCH_NAME}:${BUILD_NUMBER} ${dockerUsername}/i-${username}-${BRANCH_NAME}:${BUILD_NUMBER}"
+                //         sh "docker tag i-${username}-${BRANCH_NAME}:${BUILD_NUMBER} ${dockerUsername}/i-${username}-${BRANCH_NAME}"
+                //         sh "docker push ${dockerUsername}/i-${username}-${BRANCH_NAME}:${BUILD_NUMBER}"
+                //         sh "docker push ${dockerUsername}/i-${username}-${BRANCH_NAME}"
+                //     }
+                // }
+            }
         }
         stage('Docker Deployment'){
             steps{
-                sh 'docker run --name c-${username}-${BRANCH_NAME} -d -p ${dockerPort}:80 -e branch=${BRANCH_NAME} i-${username}-${BRANCH_NAME}:${BUILD_NUMBER}'
-            }  
-        } 
+                sh 'docker run --name c-${username}-${BRANCH_NAME} -d -p ${dockerPort}:80 -e branch=${BRANCH_NAME} ${username}/i-${username}-${BRANCH_NAME}:${BUILD_NUMBER}'
+            }
+        }
         stage('Kubernetes Deployment'){
             steps{
-                //sh 'kubectl apply -f ./kubernetes/frontend.yaml -n=kubernetes-cluster-samraazeem'
-                //sh 'kubectl apply -f ./kubernetes/backend.yaml -n=kubernetes-cluster-samraazeem'
-                sh 'npm install'
+                sh 'kubectl apply -f ./kubernetes/frontend.yml -n=kubernetes-cluster-samraazeem'
+                sh 'kubectl apply -f ./kubernetes/backend.yml -n=kubernetes-cluster-samraazeem'
+                // sh 'npm install'
             }
-        } 
+        }
     }
 }
