@@ -35,7 +35,7 @@ pipeline{
 
         stage('Unit Testing'){
             when {
-                branch 'development'
+                branch 'develop_original'
             }
             steps{
                sh 'ng test --codeCoverage=true --watcher=true'
@@ -56,7 +56,7 @@ pipeline{
         stage('Docker Image') {
             steps{
                 script {
-                    dockerImage= docker.build registry + ":$BUILD_NUMBER"
+                    dockerImage= docker.build registry + "${username}-${BRANCH_NAME}"
                 }
             }
         }
