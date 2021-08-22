@@ -47,7 +47,7 @@ pipeline{
                 branch 'develop-original'
             }
 			steps{
-				withSonarQubeEnv('SONAR'){
+				withSonarQubeEnv('Test_Sonar'){
 					sh 'npm run sonar'
 				}
 			}
