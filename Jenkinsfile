@@ -35,7 +35,7 @@ pipeline{
 
         stage('Unit Testing'){
             when {
-                branch 'develop_original'
+                branch 'master-original'
             }
             steps{
                sh 'ng test --codeCoverage=true --watcher=true'
@@ -44,7 +44,7 @@ pipeline{
 
         stage('SonarQube Analysis'){
             when {
-                branch 'production'
+                branch 'develop-original'
             }
 			steps{
 				withSonarQubeEnv('SONAR'){
@@ -56,7 +56,7 @@ pipeline{
         stage('Docker Image') {
             steps{
                 script {
-                    dockerImage= docker.build registry + "${username}-${BRANCH_NAME}"
+                    dockerImage= docker.build registry + "i-${username}-${BRANCH_NAME}:${BUILD_NUMBER}"
                 }
             }
         }
