@@ -74,14 +74,14 @@ pipeline{
                         sh(script: "docker rm -f c-${username}-${BRANCH_NAME}", returnStatus: true)
                     }
                 }
-                stage('Publish DockerHub'){
-                    steps{
-                        sh "docker tag i-${username}-${BRANCH_NAME}:${BUILD_NUMBER} ${dockerUsername}/i-${username}-${BRANCH_NAME}:${BUILD_NUMBER}"
-                        sh "docker tag i-${username}-${BRANCH_NAME}:${BUILD_NUMBER} ${dockerUsername}/i-${username}-${BRANCH_NAME}"
-                        sh "docker push ${dockerUsername}/i-${username}-${BRANCH_NAME}:${BUILD_NUMBER}"
-                        sh "docker push ${dockerUsername}/i-${username}-${BRANCH_NAME}"
-                    }
-                }
+                // stage('Publish DockerHub'){
+                //     steps{
+                //         sh "docker tag i-${username}-${BRANCH_NAME}:${BUILD_NUMBER} ${dockerUsername}/i-${username}-${BRANCH_NAME}:${BUILD_NUMBER}"
+                //         sh "docker tag i-${username}-${BRANCH_NAME}:${BUILD_NUMBER} ${dockerUsername}/i-${username}-${BRANCH_NAME}"
+                //         sh "docker push ${dockerUsername}/i-${username}-${BRANCH_NAME}:${BUILD_NUMBER}"
+                //         sh "docker push ${dockerUsername}/i-${username}-${BRANCH_NAME}"
+                //     }
+                // }
             }
         }
         stage('Docker Deployment'){
