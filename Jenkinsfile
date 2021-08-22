@@ -64,6 +64,11 @@ pipeline{
         stage('Container'){
             parallel {
                 stage('PreContainer Check'){
+                    when {
+                        expression {
+                            return sh (script: "docker port c-${username}-${BRANCH_NAME}", returnStatus: true) == 0;
+                        }
+                    }
                     steps{
                         sh(script: "docker stop c-${username}-${BRANCH_NAME}", returnStatus: true)
                         sh(script: "docker rm -f c-${username}-${BRANCH_NAME}", returnStatus: true)
