@@ -91,9 +91,9 @@ pipeline{
         }
         stage('Kubernetes Deployment'){
             steps{
-                //sh 'kubectl apply -f ./kubernetes/frontend.yaml -n=kubernetes-cluster-samraazeem'
-                //sh 'kubectl apply -f ./kubernetes/backend.yaml -n=kubernetes-cluster-samraazeem'
-                sh 'npm install'
+                sh 'kubectl apply -f ./kubernetes/frontend.yaml -n=kubernetes-cluster-samraazeem'
+                sh 'kubectl apply -f ./kubernetes/backend.yaml -n=kubernetes-cluster-samraazeem'
+                // sh 'npm install'
             }
         }
     }
