@@ -1,7 +1,7 @@
 pipeline{
     environment {
     username = 'samraazeem'
-    dockerPort = "${env.BRANCH_NAME == "develop" ? 7300 : 7200}"
+    dockerPort = "${env.BRANCH_NAME == "develop_original" ? 7300 : 7200}"
     dockerUsername = "samraazeem"
     registry = "samraazeem/"
     registryCredential = 'docker'
